@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=980, user-scalable=no">
+    <title>SGI - Dimayor</title>
+    <link rel="icon" href="favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #004c99; }
+        .wrap {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        iframe {
+            border: none;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script>
+        var APP_URL = "https://script.google.com/a/macros/dimayor.com.co/s/AKfycbxjmViZOZJ57Bphd3dOqadV3VXEWNeCy6UZYatd75UVFW1ENF1k23b1_77emPcdseEX/exec";
+
+        function isIOS() {
+            // iPhone/iPod/iPad clásico + iPadOS (que se reporta como "MacIntel" con soporte táctil)
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        }
+
+        if (isIOS()) {
+            // En iOS, Safari bloquea la cookie de sesión de Google dentro de un iframe
+            // de otro dominio (ITP), así que el login nunca llega a mostrarse.
+            // Por eso abrimos la app directo en la misma pestaña, sin iframe.
+            window.location.replace(APP_URL);
+        }
+
+        // SHARE — recibe mensaje del iframe y ejecuta Web Share API desde el contexto correcto
+        window.addEventListener("message", function(e) {
+            // Solo aceptamos mensajes que vengan del propio Apps Script
+            if (e.origin !== "https://script.google.com") return;
+            if (!e.data || e.data.type !== "share") return;
+            var url    = e.data.url;
+            var nombre = e.data.nombre;
+            if (navigator.share) {
+                navigator.share({
+                    title: nombre,
+                    text: "Te comparto este archivo de Dimayor: " + nombre,
+                    url: url
+                }).catch(function() {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(function() {
+                    alert("Enlace copiado al portapapeles ✓");
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="wrap">
+        <iframe
+            id="appFrame"
+            src="https://script.google.com/a/macros/dimayor.com.co/s/AKfycbxjmViZOZJ57Bphd3dOqadV3VXEWNeCy6UZYatd75UVFW1ENF1k23b1_77emPcdseEX/exec"
+            scrolling="yes"
+            title="SGI Dimayor"
+        ></iframe>
+    </div>
+</body>
+</html>
